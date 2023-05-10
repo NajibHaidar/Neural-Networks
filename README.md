@@ -41,15 +41,15 @@ Through these exercises, we aim to gain insights into the practical application 
 ###  Sec. II. Theoretical Background
 The model training process is essentially an optimization problem where the aim is to minimize the loss function. Here's a step-by-step breakdown of what happens during training:
 
-**Forward Pass:** During the forward pass, the model makes predictions based on the current values of its parameters (weights and biases). The input data is passed through each layer of the neural network, with each layer performing specific computations using its current parameters and activation function, and passing the output to the next layer.
+* **Forward Pass:** During the forward pass, the model makes predictions based on the current values of its parameters (weights and biases). The input data is passed through each layer of the neural network, with each layer performing specific computations using its current parameters and activation function, and passing the output to the next layer.
 
-**Loss Calculation:** Once the model has made a prediction, the loss (or error) is calculated using a loss function. In your case, it's the Mean Squared Error (MSE) loss, which calculates the average squared difference between the model's predictions and the actual target values. The output is a single number representing the cost associated with the current state of the model.
+* **Loss Calculation:** Once the model has made a prediction, the loss (or error) is calculated using a loss function. In your case, it's the Mean Squared Error (MSE) loss, which calculates the average squared difference between the model's predictions and the actual target values. The output is a single number representing the cost associated with the current state of the model.
 
-**Backward Pass (Backpropagation):** This is where the model learns. The error calculated in the previous step is propagated back through the network, starting from the final layer. This process involves applying the chain rule to compute the gradient (or derivative) of the loss function with respect to the model parameters. In essence, it determines how much each parameter contributed to the error.
+* **Backward Pass (Backpropagation):** This is where the model learns. The error calculated in the previous step is propagated back through the network, starting from the final layer. This process involves applying the chain rule to compute the gradient (or derivative) of the loss function with respect to the model parameters. In essence, it determines how much each parameter contributed to the error.
 
-**Parameter Update:** Once the gradients are computed, they are used to adjust the model parameters in a way that decreases the loss function. The adjustments are made in the opposite direction of the gradients. This is where the learning rate comes into play—it determines the size of the steps taken in the direction of the negative gradient during these updates. The optimizer, like Adam or SGD in our case, is the algorithm that performs these updates.
+* **Parameter Update:** Once the gradients are computed, they are used to adjust the model parameters in a way that decreases the loss function. The adjustments are made in the opposite direction of the gradients. This is where the learning rate comes into play—it determines the size of the steps taken in the direction of the negative gradient during these updates. The optimizer, like Adam or SGD in our case, is the algorithm that performs these updates.
 
-**Iterate:** Steps 1 to 4 constitute a single training iteration, or epoch. This process is repeated for a specified number of epochs, with the aim of progressively reducing the loss on our training data.
+* **Iterate:** Steps 1 to 4 constitute a single training iteration, or epoch. This process is repeated for a specified number of epochs, with the aim of progressively reducing the loss on our training data.
 
 Over time, this process adjusts the model's parameters so that it can map the input data to the correct output more accurately.
 
@@ -93,13 +93,13 @@ When we start working on the MNIST dataset, we project our data into 20-componen
 
 Here's a more detailed explanation:
 
-**-Data Standardization:** PCA starts with a dataset of possibly correlated variables. For successful PCA, it is essential to standardize these initial variables to have mean=0 and variance=1.
+* **Data Standardization:** PCA starts with a dataset of possibly correlated variables. For successful PCA, it is essential to standardize these initial variables to have mean=0 and variance=1.
 
-**-Covariance Matrix Computation:** PCA computes the covariance matrix of the data to understand how the variables of the input dataset are varying from the mean with respect to each other, or in other words, to see if there is any pattern in the scatter of the data.
+* **Covariance Matrix Computation:** PCA computes the covariance matrix of the data to understand how the variables of the input dataset are varying from the mean with respect to each other, or in other words, to see if there is any pattern in the scatter of the data.
 
-**-Eigenvalues and Eigenvectors Calculation:** PCA aims to find the directions (or vectors) that maximize the variance of the data. These directions are called eigenvectors, and the length of an eigenvector is called an eigenvalue. The eigenvector with the highest corresponding eigenvalue is the first principal component.
+* **Eigenvalues and Eigenvectors Calculation:** PCA aims to find the directions (or vectors) that maximize the variance of the data. These directions are called eigenvectors, and the length of an eigenvector is called an eigenvalue. The eigenvector with the highest corresponding eigenvalue is the first principal component.
 
-**-Data Projection:** The last step is to project the original data into these new coordinates (or onto the new basis), giving you the final output of the PCA.
+* **Data Projection:** The last step is to project the original data into these new coordinates (or onto the new basis), giving you the final output of the PCA.
 
 The principal components are a straight line, and the first principal component holds the most variance in the data. Thus, in feature space, this means that the first principal component contains the most dominant features in our data set. Each subsequent principal component is orthogonal to the last and has a lesser variance. In this way, PCA converts the data into a new coordinate system, and the axes of this new system are the principal components.
 
@@ -170,6 +170,28 @@ Y = torch.tensor(Y_np, dtype=torch.float32).view(-1, 1)
 **X_np** and **Y_np** are 1D arrays, and **X** and **Y** are transformed to 2D tensors with one column each, i.e., column vectors. The **.view()** function in PyTorch is used to reshape the tensor. It's similar to the **reshape()** function in NumPy. The -1 in .view(-1, 1) is a placeholder that tells PyTorch to calculate the correct dimension given the other specified dimensions and the total size of the tensor.
 
 For example, we have a tensor of size (31,), and thus calling .view(-1, 1) on it would reshape it to a size of (31, 1) so that it is now 2D.
+
+Next, I split the data into training and test sets and defined some hyperparameters for my three-layer neural network:
+
+```
+# Split the data into training and test sets
+X_train_tensorA = X[:20]
+Y_train_tensorA = Y[:20]
+X_test_tensorA = X[20:]
+Y_test_tensorA = Y[20:]
+
+input_size = 1
+hidden_size = 32
+output_size = 1
+learning_rate = 0.01
+epochs = 1000
+
+model = ThreeLayerNN(input_size, hidden_size, output_size)
+criterion = nn.MSELoss()
+optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+```
+
+The NN was chosen to have 1-dimensional tensor input and output since the input is a single scalar value and the predicted output should be so as well. The hidden size is the number of nodes in the hidden layer between the input and output layers. The learning rate is set to 0.01 and coresponds to the step size at each iteration while moving toward a minimum of a loss function. A smaller learning rate could make the learning process slower but more precise. An epoch is a single pass through the entire training dataset and after playing around, 1000 seemed to do pretty well. The criterion sets the loss function to be the mean squared error (MSE) and the optimizer is Adam. I chose Adam over SGD since the data here is relatively small and simple, and Adam typically performs better on such datasets.
 
 ### Sec. IV. Computational Results
 ### Sec. V. Summary and Conclusions
