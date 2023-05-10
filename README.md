@@ -193,5 +193,46 @@ optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
 The NN was chosen to have 1-dimensional tensor input and output since the input is a single scalar value and the predicted output should be so as well. The hidden size is the number of nodes in the hidden layer between the input and output layers. The learning rate is set to 0.01 and coresponds to the step size at each iteration while moving toward a minimum of a loss function. A smaller learning rate could make the learning process slower but more precise. An epoch is a single pass through the entire training dataset and after playing around, 1000 seemed to do pretty well. The criterion sets the loss function to be the mean squared error (MSE) and the optimizer is Adam. I chose Adam over SGD since the data here is relatively small and simple, and Adam typically performs better on such datasets.
 
+I then trained the NN and collected the loss:
+
+```
+for epoch in range(epochs):
+    optimizer.zero_grad()
+    outputs = model(X_train_tensorA)
+    loss = criterion(outputs, Y_train_tensorA)
+    loss.backward()
+    optimizer.step()
+
+    if (epoch+1) % 100 == 0:
+        print(f'Epoch [{epoch+1}/{epochs}], Loss: {loss.item():.4f}')
+
+with torch.no_grad():
+    train_outputsA = model(X_train_tensorA)
+    train_lossA = criterion(train_outputsA, Y_train_tensorA)
+    print(f'Least-square error on training data: {train_lossA.item():.4f}')
+
+    test_outputsA = model(X_test_tensorA)
+    test_lossA = criterion(test_outputsA, Y_test_tensorA)
+    print(f'Least-square error on test data: {test_lossA.item():.4f}')
+```
+
+This code block is the main training loop of the model. Here's how it works:
+
+1. `for epoch in range(epochs):` This begins the training loop. For each epoch (a single pass through the entire training dataset), the model parameters are adjusted to minimize the loss function.
+
+2. `optimizer.zero_grad()` Before the gradients are calculated for this new pass, they need to be explicitly set to zero. This is because PyTorch accumulates gradients, i.e., the gradients calculated for the parameters are added to any previously calculated gradients. For each new pass, we want to start with fresh gradients.
+
+3. `outputs = model(X_train_tensorA)` The forward pass is carried out by passing the training data to the model. The model returns its predictions based on the current state of its parameters.
+
+4. `loss = criterion(outputs, Y_train_tensorA)` The loss function, `criterion`, calculates the loss by comparing the model's predictions, `outputs`, with the actual values, `Y_train_tensorA`.
+
+5. `loss.backward()` The backward pass is initiated. This computes the gradient of the loss with respect to the model parameters. In other words, it calculates how much a small change in each model parameter would affect the loss.
+
+6. `optimizer.step()` The optimizer adjusts the model parameters based on the gradients computed during the `.backward()` call. The learning rate controls the size of these adjustments.
+
+7. `if (epoch+1) % 100 == 0: print(f'Epoch [{epoch+1}/{epochs}], Loss: {loss.item():.4f}')` This is a logging statement that prints out the loss every 100 epochs. This can help us monitor the training process and see if the loss is decreasing as expected.
+
+Through this repeated process of making predictions, calculating loss, computing gradients and updating parameters, the model learns to make more accurate predictions. This is the essence of training a neural network.
+
 ### Sec. IV. Computational Results
 ### Sec. V. Summary and Conclusions
