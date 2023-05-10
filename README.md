@@ -30,7 +30,7 @@ Machine learning algorithms have become a cornerstone in the field of data analy
 
 #### Overview:
 
-Our study is divided into two main parts.
+Our project is divided into two main parts.
 
 In the first part, we focus on a numerical dataset, fitting the data using a three-layer feed-forward neural network. Our approach involves splitting the data into training and test sets in different ways, allowing us to observe how the model's performance varies with different training and testing configurations. The least-square error is computed to evaluate the model's performance on both the training and test sets.
 
@@ -53,6 +53,7 @@ The model training process is essentially an optimization problem where the aim 
 
 Over time, this process adjusts the model's parameters so that it can map the input data to the correct output more accurately.
 
+
 Optimizers play a crucial role in training neural networks by updating the weights and biases during the backpropagation process. Each optimizer uses a different strategy to update the parameters, and some strategies can be more effective than others for a particular problem. For example, some optimizers may converge faster or to a better solution than others. Therefore, selecting the appropriate optimizer for a given problem can have a significant impact on the performance of the model. It's common practice to experiment with different optimizers to find the one that works best for the specific task at hand. We have used Adam and Stochastic Gradient Descent so let us compare to the two:
 
 **Stochastic Gradient Descent (SGD):**
@@ -63,8 +64,8 @@ The word 'stochastic' means a system or a process that is linked with a random p
 
 While this can lead to a lot of noise in the training process, it has two primary benefits:
 
-**-** It can make the training process much faster for large datasets.
-**-** The noise can help the model escape shallow local minima in the loss landscape.
+* It can make the training process much faster for large datasets.
+* The noise can help the model escape shallow local minima in the loss landscape.
 
 **Adam (Adaptive Moment Estimation) Optimizer:**
 
@@ -76,13 +77,17 @@ The initial learning rate is adapted based on how quickly we want parameters to 
 
 The benefits of using Adam include:
 
-**-** Fairly low memory requirements (though higher than SGD and Nesterov Accelerated Gradient).
-**-** Usually works well even with little tuning of hyperparameters.
+* Fairly low memory requirements (though higher than SGD and Nesterov Accelerated Gradient).
+* Usually works well even with little tuning of hyperparameters.
   
 In practice, Adam is currently recommended as the default algorithm to use, and often works slightly better than SGD. However, it is often also beneficial to try out different optimization algorithms for different problems, as there is no one-size-fits-all optimizer.
 
-When we start working on the MNIST dataset, we project our data into 20-component PCA space to make our classification easier and have the computation consume less time thanks to a more defined feature space. It is important to understand PCA before moving on:
+It is also important to note that nerual networks use data structures called **Tensors**:
 
+In PyTorch, a **Tensor** is a multi-dimensional array that is similar to the ndarray object in NumPy, with the addition being that it can run on a GPU for faster computing. Tensors are fundamental to PyTorch and are used for building neural networks and other machine learning models. They can have different ranks or dimensions, such as a 1D tensor (vector), 2D tensor (matrix), 3D tensor (volume), or higher-dimensional tensors. Each dimension of a tensor is called an axis or a rank, and it has a corresponding size that specifies the number of elements in that axis.
+
+
+When we start working on the MNIST dataset, we project our data into 20-component PCA space to make our classification easier and have the computation consume less time thanks to a more defined feature space. It is important to understand PCA before moving on:
 
 **Principal Component Analysis (PCA)** is a technique used for dimensionality reduction or feature extraction. It's commonly used in exploratory data analysis and for making predictive models. It is a statistical procedure that orthogonally transforms the 'n' coordinates of a dataset into a new set of 'n' coordinates known as the principal components.
 
@@ -99,3 +104,72 @@ Here's a more detailed explanation:
 The principal components are a straight line, and the first principal component holds the most variance in the data. Thus, in feature space, this means that the first principal component contains the most dominant features in our data set. Each subsequent principal component is orthogonal to the last and has a lesser variance. In this way, PCA converts the data into a new coordinate system, and the axes of this new system are the principal components.
 
 PCA is often used before applying a machine learning algorithm, to reduce the dimensionality and thus complexity of the dataset, which can help to avoid overfitting, improve model performance, and allow for better visualizations of the data.
+
+### Sec. III. Algorithm Implementation and Development
+
+Initally, I imported all the useful libraries (note that this list grew as I went on with the project):
+
+```
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import TensorDataset, DataLoader
+import numpy as np
+from sklearn.decomposition import PCA
+from torchvision import datasets, transforms
+import matplotlib.pyplot as plt
+from torch.nn import functional as F
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+import warnings
+```
+
+Then, I defined a three-layer neural network class:
+
+```
+class ThreeLayerNN(nn.Module):
+    def __init__(self, input_size, hidden_size, output_size):
+        super(ThreeLayerNN, self).__init__()
+        self.fc1 = nn.Linear(input_size, hidden_size)
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(hidden_size, output_size)
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = self.relu(x)
+        x = self.fc2(x)
+        return x
+```
+
+The class **ThreeLayerNN** is a subclass of **nn.Module**, which is the base class for all neural network modules in PyTorch. Our class inherits all the properties and methods of nn.Module.
+
+During the initialization (__init__) of an object of this class, three layers are defined:
+
+* **fc1** is a fully connected layer (nn.Linear) that takes input_size inputs and outputs hidden_size outputs.
+* **relu** is a Rectified Linear Unit (ReLU) activation function. It is a common activation function in deep learning models that helps introduce non-linearity into the model.
+* **fc2** is another fully connected layer that takes hidden_size inputs (from the previous layer) and outputs output_size outputs.
+
+The **forward** function defines the forward propagation of the neural network, i.e., how the data flows through the network from input to output:
+
+* The input x is passed through the first fully connected layer **fc1** and the output is then passed through the **ReLU** activation function.
+* This result is then passed through the second fully connected layer **fc2** to produce the final output.
+
+Then, the data was defined using Numpy arrays and converted to PyTorch Tensors:
+
+```
+X_np = np.arange(0, 31)
+Y_np = np.array([30, 35, 33, 32, 34, 37, 39, 38, 36, 36, 37, 39, 42, 45, 45, 41,
+              40, 39, 42, 44, 47, 49, 50, 49, 46, 48, 50, 53, 55, 54, 53])
+
+X = torch.tensor(X_np, dtype=torch.float32).view(-1, 1)
+Y = torch.tensor(Y_np, dtype=torch.float32).view(-1, 1)
+```
+**X_np** and **Y_np** are 1D arrays, and **X** and **Y** are transformed to 2D tensors with one column each, i.e., column vectors. The **.view()** function in PyTorch is used to reshape the tensor. It's similar to the **reshape()** function in NumPy. The -1 in .view(-1, 1) is a placeholder that tells PyTorch to calculate the correct dimension given the other specified dimensions and the total size of the tensor.
+
+For example, we have a tensor of size (31,), and thus calling .view(-1, 1) on it would reshape it to a size of (31, 1) so that it is now 2D.
+
+### Sec. IV. Computational Results
+### Sec. V. Summary and Conclusions
