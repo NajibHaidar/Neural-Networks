@@ -493,23 +493,28 @@ Figure 2 represents the results of modeling our data B (train: first and last 10
 *Figure 5: 19th Degree Polynomial Model Trainng and Test Results on Data A*
 
 ![image](https://github.com/NajibHaidar/Neural-Networks/assets/116219100/93695d22-0c7e-428f-9549-7a784406be74)
-*Figure 6: Line Model Trainng and Test Results on Data B
+*Figure 6: Line Model Trainng and Test Results on Data B*
 
 ![image](https://github.com/NajibHaidar/Neural-Networks/assets/116219100/9ea4322d-a33d-4b43-a29a-6657ed3f6d5d)
-*Figure 7: Parabola Model Trainng and Test Results on Data B
+*Figure 7: Parabola Model Trainng and Test Results on Data B*
 
 ![image](https://github.com/NajibHaidar/Neural-Networks/assets/116219100/18ccda10-e6c0-4b7b-b980-9efa20dd7eb2)
-*Figure 8: 19th Degree Polynomial Model Trainng and Test Results on Data B
+*Figure 8: 19th Degree Polynomial Model Trainng and Test Results on Data B*
 
 ![image](https://github.com/NajibHaidar/Neural-Networks/assets/116219100/cd299f9e-583c-45b3-bb8f-e459bf27a962)
-*Figure 9: np.polyfit() LSE Model Comparison on Data A
+*Figure 9: np.polyfit() LSE Model Comparison on Data A*
 
 ![image](https://github.com/NajibHaidar/Neural-Networks/assets/116219100/711c0163-161d-4a01-8596-036db7e09870)
-*Figure 10: np.polyfit() LSE Model Comparison on Data B
+*Figure 10: np.polyfit() LSE Model Comparison on Data B*
 
-Comparing figures 3-8:
+
+**Comparing figures 3-8:**
 
 Recall that the given data points oscillate but still steadily increase as X increases.
+
+![image](https://github.com/NajibHaidar/Neural-Networks/assets/116219100/49dc4f89-b59f-4478-b292-f358c426c5a8)
+*Figure 11: Plot of Given Data Points X and Y*
+
 
 For the line model, both types of tests yielded very low error in training and testing. However it seems that this model adapted better (although slim) to the version where we removed the middle values during training. This could be interpreted that since we are drawing a line here, the incline is what is important. The total incline can be better depicted by taking points in the beginning and then end of the entire data set and thus this would reduce error.
 
@@ -529,4 +534,35 @@ The comparision of results of using np.polyfit() vs my three-layer NN can be sum
 
 5. **Error Calculation:** Lastly, it's important to remember that the error calculation is a significant part of model evaluation. Different models may optimize for different types of errors, which might result in different best-fit parameters.
 
+
+![image](https://github.com/NajibHaidar/Neural-Networks/assets/116219100/08fae384-ff0b-4441-b277-79243abcc736)
+*Figure 12: First 20 PCA Modes (Eigen-Digits) for MNSIT Data*
+
+Looking at the images of the first 20 PCA modes (figure 12) can give you insight into these major patterns of variance. However, because the PCA modes are ordered by the amount of variance they account for in the dataset (with the first PCA mode accounting for the most variance), the later PCA modes (like the 20th) will account for much less variance than the earlier ones (like the 1st). Therefore, their images might be harder to interpret intuitively, as they represent more subtle features of the data. This is evident as we can see that the first PCA mode looks like a 0 and so the shape of the zero is a feature that distinguishes round-shaped digits (like 0, 6, 8, and 9) from the others. As for the 20th PCA mode, it accounts for much less variance than the first few PCA modes, and its image might be harder to interpret intuitively, as it represents more subtle or specific features in the data.
+
+It's also important to note that even though higher PCA modes add less to the classification process individually, collectively they can still capture important features of the data, especially when the data is high-dimensional like images. The goal of PCA is to capture as much variance as possible with the fewest number of components, but often it's a balance between data reduction and preserving information.
+
+![image](https://github.com/NajibHaidar/Neural-Networks/assets/116219100/6e0a739c-39cf-45a4-acff-be9cfd83e33f)
+*Figure 13: Model Accuracy Comparison on MNIST Dataset (PCA 20-components)*
+
+Our results show varying levels of performance across different models, which is a common outcome in machine learning tasks. Let's discuss each model briefly:
+
+1. **Feed-Forward Neural Network (FFNN):** I achieved an accuracy of 96% with this model, which is quite impressive. This indicates that the FFNN was capable of capturing the complex relationships between the input features (pixels) and the output class (digit). Neural networks are powerful models that can learn complex patterns in high-dimensional data, making them well-suited for tasks like image classification. This reinforces the claim we made about NNs in the previous part in that they require more complex data in order to unleash their true power.
+
+2. **Long Short-Term Memory (LSTM):** The LSTM also achieved an accuracy of 96%, matching the FFNN. This is interesting as LSTMs are a type of recurrent neural network (RNN) typically used for sequential data. Their ability to remember information over long sequences doesn't inherently provide an advantage in image classification tasks like MNIST. The fact that it performs as well as the FFNN could be attributed to the model's complexity and the ability to learn intricate patterns, similar to FFNN.
+
+3. **Support Vector Machines (SVM):** My SVM classifier outperformed both the neural network models with an accuracy of 98%. SVMs are powerful classifiers that work by finding a hyperplane in the feature space that best separates the classes. Their ability to handle high-dimensional data, effective use of kernel methods, and maximizing the margin between classes could be the reasons for its superior performance in this task.
+
+4. **Decision Tree Classifier:** The decision tree model had the lowest accuracy at 85%. Decision trees tend to be less effective for high-dimensional data where complex relationships exist between features, as they partition the feature space using axis-aligned splits. Moreover, decision trees are more prone to overfitting compared to other models, which could have resulted in lower test accuracy.
+
+In conclusion, while all four models have their strengths and weaknesses, SVM proved to be the most accurate for this task. However, this doesn't mean SVMs will always outperform the others. The choice of model should be based on the specific characteristics of the data and the problem at hand. Each model also has a set of hyperparameters that can be tuned to possibly improve performance. Furthermore, other factors like computational efficiency, model interpretability, and the need for online updates could also influence the choice of model.
+
 ### Sec. V. Summary and Conclusions
+
+The study applied machine learning models, specifically neural networks, to model and predict numerical data and classify images from the MNIST dataset. The three-layer feed-forward neural network performed poorly on predicting the cosine-like numerical data, with several potential reasons such as underfitting, poor training, random initialization, and lack of non-linearity. The model could not capture the underlying patterns of the data, indicating a need for more complex models or feature engineering.
+
+Different models were compared, including a line model, a parabola model, and a 19th-degree polynomial model. Overfitting was observed with the 19th-degree polynomial model, which performed perfectly on training data but poorly on testing data. Overall, np.polyfit() was found to model the data better than the neural network, suggesting that simpler methods could outperform more complex ones given certain circumstances.
+
+For image classification, PCA was applied to reduce dimensionality. The first PCA mode represented the most variance in the dataset, with each subsequent mode accounting for less variance. Neural networks, LSTMs, SVMs, and decision trees were compared on the MNIST dataset. SVM outperformed the other models with an accuracy of 98%, despite the high complexity of neural networks and LSTMs.
+
+In conclusion, the choice of model depends on the specific characteristics of the data and the problem at hand. Model complexity, training data size, determinism, overfitting, regularization, and error calculation all play significant roles in model performance and selection.
