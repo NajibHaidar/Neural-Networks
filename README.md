@@ -463,5 +463,25 @@ print(f'Decision tree accuracy: {accuracy_dt:.4f}')
 ### Sec. IV. Computational Results
 
 ![image](https://github.com/NajibHaidar/Neural-Networks/assets/116219100/0d3bfba3-5d94-4b88-bd94-5a9dfec4f0d8)
+*Figure 1: Three-Layer NN Model Trainng and Test Results on Data A*
+
+In figure 1, we can see that the neural network did not do such a good job at modeling our data A (train: first 20, test: last 10). Our mdodel predicted a straight line although out actual data is similar to a cosine wave. The output of our model strongly depends on its complexity, the optimization process, and the quality of the data it was trained on. Here are a few possibilities of why I believe the model might be predicting a straight line:
+
+1. **Underfitting:** Our model might be too simple to capture the cosine-like patterns in the data. Our model is a linear model or a shallow neural network, it might not have enough flexibility to fit to non-linear data. In this case, we might need to try a more complex model (like a deeper neural network) or engineer more complex features that can capture the cosine-like behavior.
+
+2. **Poor Training:** If the learning rate is too high or too low, or if the model isn't trained for enough epochs, the optimization process might not converge to a good solution. I tryied adjusting the learning rate and training for more epochs but that did not improve the performance.
+
+3. **Initialization:** Neural networks are initialized with random weights. Sometimes, due to bad luck, they might start in a position that leads to poor performance. When I tried reinitializing the model and training again, the results changed, but not for the better or worse; they were mostly random.
+
+4. **Lack of Non-Linearity:** Our model only includes one non-linear activation function, ReLU. Due to lack of more non-linear activation functions (like another ReLU, a sigmoid, or tanh), it might not be able to model non-linear relationships between the input and the output.
+
+All in all, experimenting with hyperparameters may improve results but according to my experience, this was the best I could get and hence I have to condlude that the data is simply too simple and scarce.
+
+
+![image](https://github.com/NajibHaidar/Neural-Networks/assets/116219100/cc529abe-4eee-4934-adf1-ad12bdd01e88)
+*Figure 2: Three-Layer NN Model Trainng and Test Results on Data B*
+
+Figure 2 represents the results of modeling our data B (train: first and last 10, test: middle 10). Similarly to figure 1, the model inferred a line and my hypothesis remains unchanged. It may be noted that the model seemed to do better on this data but I believe this was a coincidence due to the test data having a gap in the middle. This means that a line would do better in making that connection since its as if we have tried to connect two endpoints (area of first 10 points, area of last 10 points).
+
 
 ### Sec. V. Summary and Conclusions
