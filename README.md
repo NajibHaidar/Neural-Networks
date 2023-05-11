@@ -105,6 +105,22 @@ The principal components are a straight line, and the first principal component 
 
 PCA is often used before applying a machine learning algorithm, to reduce the dimensionality and thus complexity of the dataset, which can help to avoid overfitting, improve model performance, and allow for better visualizations of the data.
 
+
+In the second part of the project, I compare a feed forward neural network to an LSTM neural network, SVC, and a Decision Tree Classifier:
+
+1. **Long Short-Term Memory (LSTM):**
+
+LSTM is a type of Recurrent Neural Network (RNN) architecture. Traditional RNNs have difficulties in learning long-distance dependencies due to problems known as vanishing and exploding gradients. LSTM networks are designed to combat these problems. They achieve this by introducing gates and a cell state. The gates control the flow of information into and out of the cell state, ensuring that the network has the capability to learn and remember over long sequences. This makes LSTMs particularly useful for sequence prediction problems, including time series prediction, natural language processing, and more.
+
+2. **Support Vector Machine (SVC):**
+
+Support Vector Machine (SVM) is a powerful and flexible class of supervised algorithms for both classification and regression. The fundamental idea behind SVM is to fit the widest possible "street" between the classes; in other words, the goal is to find a decision boundary that maximizes the margin between the closest points (support vectors) of the classes in the training data. SVC stands for Support Vector Classifier which is a type of SVM used for classification tasks. Kernel trick is another important concept in SVM which allows it to solve non-linearly separable problems by transforming the data into higher dimensions.
+
+3. **Decision Tree Classifier:**
+
+A Decision Tree Classifier is a simple yet powerful classification model. The decision tree builds classification or regression models in the form of a tree structure. In a decision tree, each internal node represents a "test" on an attribute, each branch represents the outcome of the test, and each leaf node represents a class label. The paths from root to leaf represent classification rules. The primary challenge in the decision tree implementation is to identify which attributes do we need to consider as the root node and each level. This process is done using some statistical approaches like Gini Index, or Gain in Entropy. Decision Trees are easy to understand, and their decisions are interpretable.
+
+
 ### Sec. III. Algorithm Implementation and Development
 
 Initally, I imported all the useful libraries (note that this list grew as I went on with the project):
@@ -171,7 +187,7 @@ Y = torch.tensor(Y_np, dtype=torch.float32).view(-1, 1)
 
 For example, we have a tensor of size (31,), and thus calling .view(-1, 1) on it would reshape it to a size of (31, 1) so that it is now 2D.
 
-Next, I split the data into training and test sets and defined some hyperparameters for my three-layer neural network:
+Next, I split the data into training (first 20) and test (last 10) sets and defined some hyperparameters for my three-layer neural network:
 
 ```
 # Split the data into training and test sets
@@ -233,6 +249,216 @@ This code block is the main training loop of the model. Here's how it works:
 7. `if (epoch+1) % 100 == 0: print(f'Epoch [{epoch+1}/{epochs}], Loss: {loss.item():.4f}')` This is a logging statement that prints out the loss every 100 epochs. This can help us monitor the training process and see if the loss is decreasing as expected.
 
 Through this repeated process of making predictions, calculating loss, computing gradients and updating parameters, the model learns to make more accurate predictions. This is the essence of training a neural network.
+
+For the next part, I split the data into different training (first and last 10) and test (middle 10) sets and then repeat the exact same training process:
+
+```
+# Split the data into training and test sets
+X_train_tensorB = torch.cat((X[:10], X[-10:]), dim=0)
+Y_train_tensorB = torch.cat((Y[:10], Y[-10:]), dim=0)
+X_test_tensorB = X[10:20]
+Y_test_tensorB = Y[10:20]
+
+# Train the neural network
+for epoch in range(epochs):
+    optimizer.zero_grad()
+    outputs = model(X_train_tensorB)
+    loss = criterion(outputs, Y_train_tensorB)
+    loss.backward()
+    optimizer.step()
+
+    if (epoch+1) % 100 == 0:
+        print(f'Epoch [{epoch+1}/{epochs}], Loss: {loss.item():.4f}')
+
+# Calculate the least-square error on training and test data
+with torch.no_grad():
+    train_outputsB = model(X_train_tensorB)
+    train_lossB = criterion(train_outputsB, Y_train_tensorB)
+    print(f'Least-square error on training data: {train_lossB.item():.4f}')
+
+    test_outputsB = model(X_test_tensorB)
+    test_lossB = criterion(test_outputsB, Y_test_tensorB)
+    print(f'Least-square error on test data: {test_lossB.item():.4f}')
+```
+
+The results of the neural networks were then compared to polynomial fitting results from my non-linear optimization project. I tested against a straight line, a parabola, and a 19th degree polynomial:
+
+```
+    # Split data into training and test sets
+    X_train_npA = X_np[:20]
+    Y_train_npA = Y_np[:20]
+    X_test_npA = X_np[20:]
+    Y_test_npA = Y_np[20:]
+
+    # Fit a line to the training data
+    line_coeffs_trainA = np.polyfit(X_train_npA, Y_train_npA, deg=1)
+    line_predictions_trainA = np.polyval(line_coeffs_trainA, X_train_npA)
+    line_error_trainA = np.sqrt(np.sum((Y_train_npA - line_predictions_trainA) ** 2)/20)
+
+    # Fit a parabola to the training data
+    parabola_coeffs_trainA = np.polyfit(X_train_npA, Y_train_npA, deg=2)
+    parabola_predictions_trainA = np.polyval(parabola_coeffs_trainA, X_train_npA)
+    parabola_error_trainA = np.sqrt(np.sum((Y_train_npA - parabola_predictions_trainA) ** 2)/20)
+
+    # Fit a 19th degree polynomial to the training data
+    poly19_coeffs_trainA = np.polyfit(X_train_npA, Y_train_npA, deg=19)
+    poly19_predictions_trainA = np.polyval(poly19_coeffs_trainA, X_train_npA)
+    poly19_error_trainA = np.sqrt(np.sum((Y_train_npA - poly19_predictions_trainA) ** 2)/20)
+
+    # Compute errors on test data
+    line_predictions_testA = np.polyval(line_coeffs_trainA, X_test_npA)
+    line_error_testA = np.sqrt(np.sum((Y_test_npA - line_predictions_testA) ** 2)/10)
+
+    parabola_predictions_testA = np.polyval(parabola_coeffs_trainA, X_test_npA)
+    parabola_error_testA = np.sqrt(np.sum((Y_test_npA - parabola_predictions_testA) ** 2)/10)
+
+    poly19_predictions_testA = np.polyval(poly19_coeffs_trainA, X_test_npA)
+    poly19_error_testA = np.sqrt(np.sum((Y_test_npA - poly19_predictions_testA) ** 2)/10
+```
+
+Since all three of these fits are polynomials, the optimal coefficients were found using Numpy library's polyfit method. An initial guess was not required for this method since polynomials have a known number of solutions and therefore it iteratively minimizes the sum of squares of the residuals between the data and the polynomial fit until it determines the best-fit coefficients.
+
+The same was repeated for the other training (first and last 10) and test (middle 10) set.
+
+After that, I started to use more complicated and higher dimensional data to see how the neural network would compare to famous classification methods such as SVM. 
+
+I began by loading the MNIST train and test data and then contiued to fit the training data into a 20 component PCA space:
+
+```
+# Load the MNIST dataset
+transform = transforms.Compose([transforms.ToTensor(),
+                                transforms.Lambda(lambda x: x.view(-1))])
+
+mnist_train = datasets.MNIST(root='./data', train=True, download=True, transform=transform)
+mnist_test = datasets.MNIST(root='./data', train=False, download=True, transform=transform)
+
+train_data = mnist_train.data.numpy()
+train_data = train_data.reshape(train_data.shape[0], -1)  # Flatten the images
+
+pca = PCA(n_components=20)
+pca.fit(train_data)
+
+# The PCA modes are stored in the components_ attribute
+pca_modes = pca.components_
+
+# Transform the data into the 20-component PCA space
+train_data_pca = pca.transform(train_data)
+train_labels = mnist_train.targets.numpy()
+
+test_data = mnist_test.data.numpy()
+test_data = test_data.reshape(test_data.shape[0], -1)  # Flatten the images
+test_data_pca = pca.transform(test_data)
+test_labels = mnist_test.targets.numpy()
+```
+
+I then wrote a small helper function that would compute the accuracy of the model:
+
+```
+def compute_accuracy(model, x, y, is_torch_model=True):
+    with torch.no_grad():
+        if is_torch_model:
+            x = torch.from_numpy(x).float()
+            output = model(x)
+            predicted = torch.argmax(output, dim=1).numpy()
+        else:
+            predicted = model.predict(x)
+        accuracy = accuracy_score(y, predicted)
+    return accuracy
+```
+I then created a two-layer feed forward neural network called FFNN:
+
+```
+class FFNN(nn.Module):
+    def __init__(self, input_size, hidden_size, output_size):
+        super(FFNN, self).__init__()
+        self.fc1 = nn.Linear(input_size, hidden_size)
+        self.fc2 = nn.Linear(hidden_size, output_size)
+
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        x = self.fc2(x)
+        return x
+```
+
+1. `self.fc1 = nn.Linear(input_size, hidden_size)`: This is the first layer of the network, often referred to as the input or hidden layer. It applies a linear transformation to the incoming data: `y = xA^T + b`. The input data is transformed from `input_size` dimensions to `hidden_size` dimensions.
+
+2. `self.fc2 = nn.Linear(hidden_size, output_size)`: This is the second layer of the network, often referred to as the output layer. It applies another linear transformation, this time from `hidden_size` dimensions to `output_size` dimensions.
+
+Note that while this network is composed of two layers, it doesn't include any hidden layers in the traditional sense, because there are no layers "hidden" between the input and output layers. 
+
+Also, note that the activation function (ReLU) is not typically counted as a layer. The activation function is applied element-wise and doesn't change the dimensionality of its input.
+
+The model was then trained and tested on the MNIST training and test data in a similar fashion to what was done in the previous part above.
+
+```
+for epoch in range(epochs):
+    for i, (data, labels) in enumerate(train_loader):
+        optimizer.zero_grad()
+        outputs = model_ffnn(data)
+        loss = criterion(outputs, labels)
+        loss.backward()
+        optimizer.step()
+
+    if (epoch+1) % 5 == 0:
+        print(f'Epoch [{epoch+1}/{epochs}], Loss: {loss.item():.4f}')
+
+accuracy_ffnn = compute_accuracy(model_ffnn, test_data_pca, test_labels)
+print()
+print(f'Feed-forward neural network accuracy: {accuracy_ffnn:.4f}')
+```
+
+Finally, I compared the feed forward neural network to an LSTM model, SVC, and Decision Tree Classifier. First I had to create the LSTM neural network and train it as before:
+
+```
+class LSTM(nn.Module):
+    def __init__(self, input_size, hidden_size, output_size):
+        super(LSTM, self).__init__()
+        self.hidden_size = hidden_size
+        self.lstm = nn.LSTM(input_size, hidden_size, batch_first=True)
+        self.fc = nn.Linear(hidden_size, output_size)
+
+    def forward(self, x):
+        x = x.unsqueeze(1)
+        h0 = torch.zeros(1, x.size(0), self.hidden_size)
+        c0 = torch.zeros(1, x.size(0), self.hidden_size)
+        out, _ = self.lstm(x, (h0, c0))
+        out = self.fc(out[:, -1, :])
+        return out
+
+model_lstm = LSTM(input_size, hidden_size, output_size)
+optimizer = optim.Adam(model_lstm.parameters(), lr=learning_rate)
+
+# Train the LSTM model
+for epoch in range(epochs):
+    for i, (data, labels) in enumerate(train_loader):
+        optimizer.zero_grad()
+        outputs = model_lstm(data)
+        loss = criterion(outputs, labels)
+        loss.backward()
+        optimizer.step()
+
+    if (epoch+1) % 5 == 0:
+        print(f'Epoch [{epoch+1}/{epochs}], Loss: {loss.item():.4f}')
+
+accuracy_lstm = compute_accuracy(model_lstm, test_data_pca, test_labels)
+print()
+print(f'LSTM accuracy: {accuracy_lstm:.4f}')
+```
+
+After gathering the results for LSTM, I then trained SVC, and a Decision Tree Classifier respectively:
+
+```
+model_svm = SVC(kernel='rbf')
+model_svm.fit(train_data_pca, train_labels)
+accuracy_svm = compute_accuracy(model_svm, test_data_pca, test_labels, is_torch_model=False)
+print(f'SVM accuracy: {accuracy_svm:.4f}')
+
+model_dt = DecisionTreeClassifier()
+model_dt.fit(train_data_pca, train_labels)
+accuracy_dt = compute_accuracy(model_dt, test_data_pca, test_labels, is_torch_model=False)
+print(f'Decision tree accuracy: {accuracy_dt:.4f}')
+```
+
 
 ### Sec. IV. Computational Results
 ### Sec. V. Summary and Conclusions
