@@ -483,5 +483,50 @@ All in all, experimenting with hyperparameters may improve results but according
 
 Figure 2 represents the results of modeling our data B (train: first and last 10, test: middle 10). Similarly to figure 1, the model inferred a line and my hypothesis remains unchanged. It may be noted that the model seemed to do better on this data but I believe this was a coincidence due to the test data having a gap in the middle. This means that a line would do better in making that connection since its as if we have tried to connect two endpoints (area of first 10 points, area of last 10 points).
 
+![image](https://github.com/NajibHaidar/Neural-Networks/assets/116219100/b855d9fd-703f-4ab6-9a2a-fc15bfcae2c9)
+*Figure 3: Line Model Trainng and Test Results on Data A*
+
+![image](https://github.com/NajibHaidar/Neural-Networks/assets/116219100/7c59106b-0fd5-4d8e-9436-4c9810f244e2)
+*Figure 4: Parabola Model Trainng and Test Results on Data A*
+
+![image](https://github.com/NajibHaidar/Neural-Networks/assets/116219100/b8892ce5-9b16-4821-a264-833d8de77758)
+*Figure 5: 19th Degree Polynomial Model Trainng and Test Results on Data A*
+
+![image](https://github.com/NajibHaidar/Neural-Networks/assets/116219100/93695d22-0c7e-428f-9549-7a784406be74)
+*Figure 6: Line Model Trainng and Test Results on Data B
+
+![image](https://github.com/NajibHaidar/Neural-Networks/assets/116219100/9ea4322d-a33d-4b43-a29a-6657ed3f6d5d)
+*Figure 7: Parabola Model Trainng and Test Results on Data B
+
+![image](https://github.com/NajibHaidar/Neural-Networks/assets/116219100/18ccda10-e6c0-4b7b-b980-9efa20dd7eb2)
+*Figure 8: 19th Degree Polynomial Model Trainng and Test Results on Data B
+
+![image](https://github.com/NajibHaidar/Neural-Networks/assets/116219100/cd299f9e-583c-45b3-bb8f-e459bf27a962)
+*Figure 9: np.polyfit() LSE Model Comparison on Data A
+
+![image](https://github.com/NajibHaidar/Neural-Networks/assets/116219100/711c0163-161d-4a01-8596-036db7e09870)
+*Figure 10: np.polyfit() LSE Model Comparison on Data B
+
+Comparing figures 3-8:
+
+Recall that the given data points oscillate but still steadily increase as X increases.
+
+For the line model, both types of tests yielded very low error in training and testing. However it seems that this model adapted better (although slim) to the version where we removed the middle values during training. This could be interpreted that since we are drawing a line here, the incline is what is important. The total incline can be better depicted by taking points in the beginning and then end of the entire data set and thus this would reduce error.
+
+For the parabola model, the test error after training on the last 10 points was noticeably higher than that on the middle points. This could be interpreted that since the degree of curvature of a parabola will depend on future points, this was better captured when taking points in the beginning and then end of the entire data set and thus this would reduce error.
+
+For the 19th degree polynomial model, the training error in both cases was almost nonexistent. This makes sense since a 19th degree polynomial can pass through all 20 data points with ease due to its degree. However, the test error was astronomical when testing the last 10 points and very large when testing the middle 10 points. This greatly descibes a phenomenon called overfitting. The model has been trained so strongly on the training data (by passing through each point) that when it is given data outside this data set its behaviour is very offset. The test on the middle points was definitely much better (although still not good) than the test on the end points. The interpretation for this is that since the problem here is overfitting, the gap presented by skipping the middle 10 points in training allows this model to be less overfit than its counterpart. The one tested on the first 20 points catches onto the given data points much more strongly and thus results in a much stronger effect of overfitting thus greatly increasing the error when the data changes from what the model was trained on.
+
+The comparision of results of using np.polyfit() vs my three-layer NN can be sumarized as such:
+
+1. **Model Complexity:** np.polyfit() is a linear method that can be used to fit polynomial models. Depending on the degree of the polynomial chosen, this method can model a variety of simple to moderately complex data. The neural network, on the other hand, has the capability to model very complex, high-dimensional, and non-linear relationships. For the cosine-like data, a polynomial of sufficient degree might be able to model the data better than a simple three-layer network.
+
+2. **Training Data Size:** If more data were present, the neural network could potentially perform better. However, this also depends on the complexity of the data. If the underlying data pattern is simple and can be captured by a polynomial, more data might not necessarily improve the neural network's performance significantly.
+
+3. **Determinism:** It's true that np.polyfit() will return the same result each time for the same data and degree, while a neural network may not due to random weight initialization and the stochastic nature of the optimization process. However, this doesn't necessarily mean that the neural network is inferior. Rather, it highlights the importance of using techniques like cross-validation to assess the model's performance and robustness.
+
+4. **Overfitting and Regularization:** It's worth mentioning that while np.polyfit() can fit higher degree polynomials, doing so can lead to overfitting (like in the 19th degree polynomial case), especially with small datasets. The neural network model, despite its poor performance in this case, can leverage regularization techniques like dropout or weight decay, to prevent overfitting.
+
+5. **Error Calculation:** Lastly, it's important to remember that the error calculation is a significant part of model evaluation. Different models may optimize for different types of errors, which might result in different best-fit parameters.
 
 ### Sec. V. Summary and Conclusions
