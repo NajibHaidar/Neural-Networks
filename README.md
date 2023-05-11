@@ -461,4 +461,7 @@ print(f'Decision tree accuracy: {accuracy_dt:.4f}')
 
 
 ### Sec. IV. Computational Results
+
+![image](https://github.com/NajibHaidar/Neural-Networks/assets/116219100/0d3bfba3-5d94-4b88-bd94-5a9dfec4f0d8)
+
 ### Sec. V. Summary and Conclusions
